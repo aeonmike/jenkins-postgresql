@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'docker build -t mikejc30/jenkins-postgresql:$BUILD_NUMBER --build-arg POSTGRES_PASSWORD=88QCuz!lA4y1G!K0 -t my-postgres-image .'
+        sh 'docker build --build-arg POSTGRES_PASSWORD=88QCuz!lA4y1G!K0 -t mikejc30/jenkins-postgresql:$BUILD_NUMBER .'
       }
     }
     stage('Login') {
