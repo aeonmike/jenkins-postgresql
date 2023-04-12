@@ -1,11 +1,11 @@
-# Use an official Ubuntu runtime as the base image
 FROM ubuntu:latest
 
-# Install PostgreSQL and other necessary packages
 RUN apt-get update && \
-    apt-get install -y postgresql && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y tzdata && \
+    ln -fs /usr/share/zoneinfo/Asia/Manila /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata
 
-# Set the default command to run when starting the container
-CMD ["postgres"]
+RUN apt-get update && \
+    apt-get install -y postgresql
+
+RUN service postgresql start
