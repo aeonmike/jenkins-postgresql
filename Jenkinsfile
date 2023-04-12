@@ -1,45 +1,31 @@
 pipeline {
-    agent any
-    
-    environment {
-        IMAGE_NAME = 'yourdockerhubusername/postgresql-rockylinux'
-        TAG = 'latest'
+  agent any
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'docker build -t mikejc30/jenkins-postgresql:$BUILD_NUMBER .'
+      }
     }
-    
-    stages {
-        stage('Build Image') {
-            steps {
-                script {
-                    def dockerfile = """
-                        FROM rockylinux/rockylinux:latest
-                        
-                        RUN dnf update -y && \
-                            dnf install -y postgresql-server && \
-                            dnf clean all && \
-                            rm -rf /var/cache/dnf/*
-                            
-                        RUN /usr/bin/postgresql-setup --initdb
-                        
-                        EXPOSE 5432
-                        
-                        CMD ["postgres", "-D", "/var/lib/pgsql/data"]
-                    """
-                    
-                    sh "echo '${dockerfile}' > Dockerfile"
-                    
-                    sh "docker build -t ${IMAGE_NAME}:${TAG} ."
-                }
-            }
-        }
-        
-        stage('Push Image to Docker Hub') {
-            steps {
-                withCredentials([string(credentialsId: 'dockerhub-creds', variable: 'DOCKERHUB_CREDENTIALS')]) {
-                    sh "docker login -u yourdockerhubusername -p ${DOCKERHUB_CREDENTIALS}"
-                    
-                    sh "docker push ${IMAGE_NAME}:${TAG}"
-                }
-            }
-        }
+    stage('Login') {
+      steps {
+        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+      }
     }
+    stage('Push') {
+      steps {
+        sh 'docker push mikejc30/jenkins-postgresql:$BUILD_NUMBER'
+      }
+    }
+  }
+  post {
+    always {
+      sh 'docker logout'
+    }
+  }
 }
