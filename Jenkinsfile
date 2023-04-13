@@ -23,6 +23,13 @@ pipeline {
       }
     }
   }
+ stage ('Deploying container to Kubernetes') {
+      steps {
+        script {
+          kubernetesDeploy(configs: "deployment.yaml", "service.yaml")
+        }
+      }
+    }
   post {
     always {
       sh 'docker logout'
