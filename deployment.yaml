@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment #The name of the Kubernetes Deployment to be created in the Kubernetes cluster
+  labels:
+    app: postgresql
+spec:
+  replicas: 2 #The number of pods to be created in the Kubernetes cluster for the postgresql container
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql #The name of the postgresql container
+        image: mikejc30/jenkins-postgresql:4 #The Docker image for building the postgresql container
+        ports:
+        - containerPort: 5462 #The port for the postgresql container
